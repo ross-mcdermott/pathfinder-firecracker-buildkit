@@ -82,6 +82,8 @@ download_firecracker() {
     log "Downloading Firecracker ${FIRECRACKER_VERSION}..."
     local temp_file="${DOWNLOADS_DIR}/firecracker.tgz"
     
+    # Note: In production, validate checksums from:
+    # https://github.com/firecracker-microvm/firecracker/releases/download/${FIRECRACKER_VERSION}/firecracker-${FIRECRACKER_VERSION}-x86_64.tgz.sha256.txt
     curl -L -o "${temp_file}" "${FIRECRACKER_URL}"
     
     log "Extracting Firecracker..."
@@ -104,6 +106,7 @@ download_kernel() {
     fi
     
     log "Downloading kernel ${KERNEL_VERSION}..."
+    # Note: In production, validate kernel integrity with checksums
     curl -L -o "${kernel_file}" "${KERNEL_URL}"
     log "Kernel downloaded successfully"
 }
@@ -132,7 +135,7 @@ create_rootfs() {
     
     # Create basic directory structure
     log "Setting up rootfs structure..."
-    sudo mkdir -p "${mount_point}"/{bin,sbin,etc,proc,sys,dev,tmp,var,root,usr/bin,usr/sbin}
+    sudo mkdir -p "${mount_point}"/{bin,sbin,etc,proc,sys,dev,tmp,var,root,run,usr/bin,usr/sbin}
     
     # Copy essential binaries from host (Alpine-like minimal system)
     log "Copying essential binaries..."
@@ -173,6 +176,7 @@ echo "====================================="
 # Check if buildkitd exists
 if [ -f /usr/bin/buildkitd ]; then
     echo "Starting buildkitd..."
+    mkdir -p /run/buildkit
     /usr/bin/buildkitd --addr unix:///run/buildkit/buildkitd.sock &
     BUILDKIT_PID=$!
     
