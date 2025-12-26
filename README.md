@@ -59,12 +59,18 @@ sudo apt-get install -y curl tar gzip e2fsprogs
    cd pathfinder-firecracker-buildkit
    ```
 
-2. **Run the sample**:
+2. **Check your system** (optional but recommended):
+   ```bash
+   ./check-system.sh
+   ```
+   This script verifies that your system meets all requirements.
+
+3. **Run the sample**:
    ```bash
    ./run-sample.sh
    ```
 
-3. **Stop the VM**:
+4. **Stop the VM**:
    Press `Ctrl+C` to stop the Firecracker VM and exit
 
 ## What the Script Does
@@ -84,6 +90,7 @@ The `run-sample.sh` script performs the following steps:
 ```
 .
 ├── run-sample.sh          # Main execution script
+├── check-system.sh        # System requirements checker
 ├── sample/
 │   └── Dockerfile        # Sample Dockerfile to build
 ├── downloads/            # Downloaded components (created by script)
