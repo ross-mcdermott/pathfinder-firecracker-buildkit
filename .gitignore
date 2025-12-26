@@ -1,0 +1,24 @@
+# Firecracker binaries and artifacts
+firecracker
+jailer
+vmlinux*
+*.ext4
+*.rootfs
+
+# Downloaded files
+downloads/
+
+# Temporary files
+*.sock
+*.log
+*.pid
+/tmp/
+
+# Build artifacts
+*.tar
+*.tar.gz
+*.img
+*.vmlinux
+
+# VM state
+vm-state/
