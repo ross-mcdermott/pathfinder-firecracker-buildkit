@@ -12,11 +12,12 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DOWNLOADS_DIR="${SCRIPT_DIR}/downloads"
 VM_STATE_DIR="${SCRIPT_DIR}/vm-state"
 FIRECRACKER_VERSION="v1.7.0"
+FIRECRACKER_MAJOR_VERSION="v1.7"
 KERNEL_VERSION="5.10"
 
 # URLs
 FIRECRACKER_URL="https://github.com/firecracker-microvm/firecracker/releases/download/${FIRECRACKER_VERSION}/firecracker-${FIRECRACKER_VERSION}-x86_64.tgz"
-KERNEL_URL="https://s3.amazonaws.com/spec.ccfc.min/firecracker-ci/v1.7/${KERNEL_VERSION}/x86_64/vmlinux-${KERNEL_VERSION}.bin"
+KERNEL_URL="https://s3.amazonaws.com/spec.ccfc.min/firecracker-ci/${FIRECRACKER_MAJOR_VERSION}/${KERNEL_VERSION}/x86_64/vmlinux-${KERNEL_VERSION}.bin"
 
 log() {
     echo -e "${GREEN}[INFO]${NC} $1"
@@ -117,8 +118,8 @@ create_rootfs() {
     
     log "Creating rootfs with buildkit..."
     
-    # Create a 2GB sparse file
-    dd if=/dev/zero of="${rootfs_file}" bs=1M count=0 seek=2048
+    # Create a 512MB sparse file (sufficient for demo purposes)
+    dd if=/dev/zero of="${rootfs_file}" bs=1M count=0 seek=512
     
     # Create ext4 filesystem
     mkfs.ext4 -F "${rootfs_file}"

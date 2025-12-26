@@ -74,11 +74,11 @@ done
 echo ""
 echo -n "Checking disk space... "
 AVAILABLE=$(df . | tail -1 | awk '{print $4}')
-REQUIRED=$((3 * 1024 * 1024))  # 3GB in KB
+REQUIRED=$((2 * 1024 * 1024))  # 2GB in KB
 if [[ $AVAILABLE -gt $REQUIRED ]]; then
     echo -e "${GREEN}✓ $(($AVAILABLE / 1024 / 1024))GB available${NC}"
 else
-    echo -e "${YELLOW}⚠ Only $(($AVAILABLE / 1024 / 1024))GB available, 3GB+ recommended${NC}"
+    echo -e "${YELLOW}⚠ Only $(($AVAILABLE / 1024 / 1024))GB available, 2GB+ recommended${NC}"
     WARNINGS=$((WARNINGS + 1))
 fi
 
