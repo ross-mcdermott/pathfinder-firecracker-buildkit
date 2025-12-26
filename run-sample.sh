@@ -50,7 +50,7 @@ check_requirements() {
     # Check if user has access to /dev/kvm
     if [[ ! -r /dev/kvm ]] || [[ ! -w /dev/kvm ]]; then
         log_error "No read/write access to /dev/kvm"
-        log_error "You may need to add your user to the kvm group: sudo usermod -aG kvm \$USER"
+        log_error "You may need to add your user to the kvm group: sudo usermod -aG kvm "'$USER'
         exit 1
     fi
     
@@ -84,13 +84,25 @@ download_firecracker() {
     
     # Note: In production, validate checksums from:
     # https://github.com/firecracker-microvm/firecracker/releases/download/${FIRECRACKER_VERSION}/firecracker-${FIRECRACKER_VERSION}-x86_64.tgz.sha256.txt
-    curl -L -o "${temp_file}" "${FIRECRACKER_URL}"
+    if ! curl -fL -o "${temp_file}" "${FIRECRACKER_URL}"; then
+        log_error "Failed to download Firecracker from ${FIRECRACKER_URL}"
+        exit 1
+    fi
     
     log "Extracting Firecracker..."
-    tar -xzf "${temp_file}" -C "${DOWNLOADS_DIR}"
+    if ! tar -xzf "${temp_file}" -C "${DOWNLOADS_DIR}"; then
+        log_error "Failed to extract Firecracker archive"
+        exit 1
+    fi
     
     # Find and move the firecracker binary
     find "${DOWNLOADS_DIR}" -name "firecracker-${FIRECRACKER_VERSION}-x86_64" -exec mv {} "${firecracker_bin}" \;
+    
+    if [[ ! -f "${firecracker_bin}" ]]; then
+        log_error "Firecracker binary not found after extraction"
+        exit 1
+    fi
+    
     chmod +x "${firecracker_bin}"
     
     rm -f "${temp_file}"
@@ -107,7 +119,16 @@ download_kernel() {
     
     log "Downloading kernel ${KERNEL_VERSION}..."
     # Note: In production, validate kernel integrity with checksums
-    curl -L -o "${kernel_file}" "${KERNEL_URL}"
+    if ! curl -fL -o "${kernel_file}" "${KERNEL_URL}"; then
+        log_error "Failed to download kernel from ${KERNEL_URL}"
+        exit 1
+    fi
+    
+    if [[ ! -f "${kernel_file}" ]]; then
+        log_error "Kernel file not found after download"
+        exit 1
+    fi
+    
     log "Kernel downloaded successfully"
 }
 
@@ -131,7 +152,10 @@ create_rootfs() {
     local mount_point="${DOWNLOADS_DIR}/rootfs_mount"
     mkdir -p "${mount_point}"
     
-    sudo mount -o loop "${rootfs_file}" "${mount_point}"
+    if ! sudo mount -o loop "${rootfs_file}" "${mount_point}"; then
+        log_error "Failed to mount rootfs at ${mount_point}"
+        exit 1
+    fi
     
     # Create basic directory structure
     log "Setting up rootfs structure..."
@@ -203,7 +227,10 @@ INITSCRIPT
 EOF
     
     # Unmount
-    sudo umount "${mount_point}"
+    if ! sudo umount "${mount_point}"; then
+        log_error "Failed to unmount ${mount_point}"
+        exit 1
+    fi
     rmdir "${mount_point}"
     
     log "Rootfs created successfully"

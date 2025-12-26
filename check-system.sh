@@ -39,7 +39,7 @@ if [[ -r /dev/kvm ]] && [[ -w /dev/kvm ]]; then
     echo -e "${GREEN}✓ Read/write access to /dev/kvm${NC}"
 else
     echo -e "${RED}✗ No read/write access to /dev/kvm${NC}"
-    echo "  Run: sudo usermod -aG kvm \$USER"
+    echo "  Run: sudo usermod -aG kvm "'$USER'
     echo "  Then log out and log back in"
     ERRORS=$((ERRORS + 1))
 fi
