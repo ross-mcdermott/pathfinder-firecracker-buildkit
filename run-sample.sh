@@ -182,6 +182,42 @@ create_rootfs() {
         done
     fi
     
+    # Copy BuildKit binaries if available
+    log "Checking for BuildKit binaries..."
+    if [[ -f "${SCRIPT_DIR}/bin/buildkitd" ]] && [[ -f "${SCRIPT_DIR}/bin/buildctl" ]]; then
+        log "Adding BuildKit binaries to rootfs..."
+        sudo cp "${SCRIPT_DIR}/bin/buildkitd" "${mount_point}/usr/bin/"
+        sudo cp "${SCRIPT_DIR}/bin/buildctl" "${mount_point}/usr/bin/"
+        sudo chmod +x "${mount_point}/usr/bin/buildkitd"
+        sudo chmod +x "${mount_point}/usr/bin/buildctl"
+        
+        # Copy required shared libraries for BuildKit
+        log "Copying required libraries for BuildKit..."
+        sudo mkdir -p "${mount_point}/lib" "${mount_point}/lib64"
+        
+        # Copy essential shared libraries from host
+        for lib in /lib/x86_64-linux-gnu/libc.so.6 \
+                   /lib/x86_64-linux-gnu/libpthread.so.0 \
+                   /lib/x86_64-linux-gnu/libdl.so.2 \
+                   /lib/x86_64-linux-gnu/libm.so.6 \
+                   /lib/x86_64-linux-gnu/libresolv.so.2 \
+                   /lib64/ld-linux-x86-64.so.2; do
+            if [[ -f "$lib" ]]; then
+                sudo cp -L "$lib" "${mount_point}/lib/" 2>/dev/null || true
+            fi
+        done
+        
+        # Create BuildKit directories
+        sudo mkdir -p "${mount_point}/var/lib/buildkit"
+        sudo mkdir -p "${mount_point}/run/buildkit"
+        
+        log "BuildKit binaries added successfully"
+    else
+        log_warn "BuildKit binaries not found in ${SCRIPT_DIR}/bin/"
+        log_warn "To add BuildKit support, run: ./setup-buildkit.sh"
+        log_warn "See README.md for full instructions"
+    fi
+    
     # Create init script
     log "Creating init script..."
     sudo tee "${mount_point}/init" > /dev/null << 'INITSCRIPT'

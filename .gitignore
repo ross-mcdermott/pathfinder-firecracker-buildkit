@@ -8,6 +8,9 @@ vmlinux*
 # Downloaded files
 downloads/
 
+# BuildKit binaries
+bin/
+
 # Temporary files
 *.sock
 *.log
